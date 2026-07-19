@@ -1,0 +1,347 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #10131a;
+  --panel: #1a1f2a;
+  --panel-raised: #212734;
+  --border: #2a3140;
+  --text: #e7eaf0;
+  --text-dim: #8b93a3;
+  --accent: #33d6a6;
+  --accent-dim: #1f8f6f;
+  --amber: #ffb020;
+  --danger: #ff5c6c;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(51, 214, 166, 0.06), transparent 40%),
+    radial-gradient(circle at 85% 90%, rgba(255, 176, 32, 0.05), transparent 40%);
+  color: var(--text);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ---------- Page shell ---------- */
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 20px 80px;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.page-header .eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.page-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.page-header p {
+  color: var(--text-dim);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+/* ---------- Boarding-pass two-panel layout ---------- */
+.pass {
+  display: flex;
+  max-width: 920px;
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5);
+}
+
+.pass-panel {
+  flex: 1;
+  padding: 32px;
+  min-width: 0;
+}
+
+.pass-panel.left {
+  border-right: none;
+}
+
+/* Dashed perforation divider with cutout circles, like a ticket stub */
+.perforation {
+  position: relative;
+  width: 0;
+  border-left: 2px dashed var(--border);
+  margin: 24px 0;
+}
+
+.perforation::before,
+.perforation::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 24px;
+  background: var(--bg);
+  border-radius: 50%;
+}
+.perforation::before { top: -12px; }
+.perforation::after { bottom: -12px; }
+
+@media (max-width: 760px) {
+  .pass { flex-direction: column; }
+  .perforation {
+    width: auto;
+    height: 0;
+    border-left: none;
+    border-top: 2px dashed var(--border);
+    margin: 0 24px;
+  }
+  .perforation::before, .perforation::after {
+    top: 50%;
+    left: -12px;
+    transform: translateY(-50%);
+  }
+  .perforation::after { left: auto; right: -12px; }
+}
+
+.panel-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.panel-title {
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0 0 20px;
+}
+
+/* ---------- Tabs (login methods) ---------- */
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tab.active {
+  background: var(--accent);
+  color: #06231a;
+}
+
+/* ---------- Form elements ---------- */
+.field {
+  margin-bottom: 14px;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.field input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 12px;
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.field input:focus {
+  border-color: var(--accent);
+}
+
+.field input.mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.btn {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn:active { transform: scale(0.99); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #06231a;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  margin-top: 8px;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 12.5px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  width: auto;
+}
+
+.link-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* ---------- OTP digit boxes ---------- */
+.otp-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.otp-box {
+  width: 42px;
+  height: 48px;
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 20px;
+  font-weight: 600;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--accent);
+  outline: none;
+}
+
+.otp-box:focus {
+  border-color: var(--accent);
+}
+
+/* ---------- Messages ---------- */
+.msg {
+  font-size: 12.5px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
+.msg-error {
+  background: rgba(255, 92, 108, 0.1);
+  border: 1px solid rgba(255, 92, 108, 0.3);
+  color: var(--danger);
+}
+
+.msg-success {
+  background: rgba(51, 214, 166, 0.1);
+  border: 1px solid rgba(51, 214, 166, 0.3);
+  color: var(--accent);
+}
+
+/* ---------- Verified stamp / profile card ---------- */
+.stamp-card {
+  max-width: 420px;
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+}
+
+.stamp {
+  display: inline-block;
+  border: 3px solid var(--accent);
+  color: var(--accent);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 6px 16px;
+  border-radius: 999px;
+  transform: rotate(-4deg);
+  margin-bottom: 20px;
+  animation: stamp-in 0.35s ease-out;
+}
+
+@keyframes stamp-in {
+  from { opacity: 0; transform: rotate(-4deg) scale(1.4); }
+  to { opacity: 1; transform: rotate(-4deg) scale(1); }
+}
+
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+}
+
+.profile-row:last-of-type { border-bottom: none; }
+.profile-row .k { color: var(--text-dim); }
+.profile-row .v { font-family: 'IBM Plex Mono', monospace; }
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp { animation: none; }
+}
