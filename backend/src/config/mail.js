@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+ const nodemailer = require('nodemailer');
 
 // ------------------------------------------------------------------
 // Validate required environment variables at module load time.
@@ -23,6 +23,10 @@ const transporter = nodemailer.createTransport({
     user: EMAIL_USER,
     pass: EMAIL_PASS,
   },
+  // Render's outbound network doesn't reliably support IPv6, and Gmail's
+  // SMTP servers resolve to IPv6 addresses by default on some hosts,
+  // causing ENETUNREACH. Forcing IPv4 avoids that entirely.
+  family: 4,
 });
 
 module.exports = { transporter, EMAIL_USER };
