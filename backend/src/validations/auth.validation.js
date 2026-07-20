@@ -19,8 +19,8 @@ const verifyOTPValidation = [
   body('email').trim().isEmail().withMessage('A valid email is required'),
   body('otp')
     .trim()
-    .matches(/^\d{6}$/)
-    .withMessage('OTP must be a 6-digit code'),
+    .matches(/^SHI\d{3}$/i)
+    .withMessage('OTP must be in the format SHI followed by 3 digits (e.g. SHI124)'),
 ];
 
 const emailOnlyValidation = [body('email').trim().isEmail().withMessage('A valid email is required')];
@@ -29,8 +29,8 @@ const resetPasswordValidation = [
   body('email').trim().isEmail().withMessage('A valid email is required'),
   body('otp')
     .trim()
-    .matches(/^\d{6}$/)
-    .withMessage('OTP must be a 6-digit code'),
+    .matches(/^SHI\d{3}$/i)
+    .withMessage('OTP must be in the format SHI followed by 3 digits (e.g. SHI124)'),
   body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters'),
 ];
 
@@ -45,8 +45,8 @@ const verifyPhoneOTPValidation = [
   ...phoneOnlyValidation,
   body('otp')
     .trim()
-    .matches(/^\d{6}$/)
-    .withMessage('OTP must be a 6-digit code'),
+    .matches(/^SHI\d{3}$/i)
+    .withMessage('OTP must be in the format SHI followed by 3 digits (e.g. SHI124)'),
 ];
 
 const refreshTokenValidation = [body('refreshToken').notEmpty().withMessage('Refresh token is required')];

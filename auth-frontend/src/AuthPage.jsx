@@ -47,9 +47,12 @@ function OtpInput({ value, onChange }) {
   };
 
   const handleChange = (index, e) => {
-    const digit = e.target.value.replace(/\D/g, '').slice(-1);
-    setDigit(index, digit || '');
-    if (digit && index < 5) refs.current[index + 1]?.focus();
+    // Allow letters + digits (OTP format is e.g. "SHI124") instead of
+    // digits only. Always stored/displayed uppercase to match the
+    // backend's case-insensitive SHI### format.
+    const char = e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(-1).toUpperCase();
+    setDigit(index, char || '');
+    if (char && index < 5) refs.current[index + 1]?.focus();
   };
 
   const handleKeyDown = (index, e) => {
@@ -59,7 +62,7 @@ function OtpInput({ value, onChange }) {
   };
 
   const handlePaste = (e) => {
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    const pasted = e.clipboardData.getData('text').replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase();
     if (pasted) {
       onChange(pasted.padEnd(6, ''));
       e.preventDefault();
@@ -74,7 +77,7 @@ function OtpInput({ value, onChange }) {
           ref={(el) => (refs.current[i] = el)}
           className="otp-box"
           type="text"
-          inputMode="numeric"
+          inputMode="text"
           maxLength={1}
           value={value[i] || ''}
           onChange={(e) => handleChange(i, e)}

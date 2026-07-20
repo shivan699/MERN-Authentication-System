@@ -1,7 +1,11 @@
-// Generates a random 6-digit numeric OTP as a string (e.g. "042913").
-// Shared across every OTP flow (register, login, reset — email or phone).
+// Generates an OTP with a fixed alphabetic prefix and 3 random digits
+// (e.g. "SHI124", "SHI956"). The prefix stays constant across every OTP
+// issued; only the numeric suffix changes per code.
+const OTP_PREFIX = 'SHI';
+
 const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  const digits = Math.floor(100 + Math.random() * 900).toString(); // 100–999
+  return `${OTP_PREFIX}${digits}`;
 };
 
 module.exports = generateOTP;
