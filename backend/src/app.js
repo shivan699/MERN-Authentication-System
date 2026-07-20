@@ -1,4 +1,4 @@
- const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
@@ -10,6 +10,12 @@ const { generalLimiter } = require('./middleware/rateLimiter');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
+
+// Render (and most hosting platforms) sit behind a reverse proxy, so the
+// real client IP arrives via the X-Forwarded-For header. Without this,
+// express-rate-limit can't reliably identify unique clients and throws
+// a validation error. `1` trusts exactly one hop (the platform's proxy).
+app.set('trust proxy', 1);
 
 // Security
 app.use(helmet());
@@ -41,14 +47,6 @@ app.get('/', (req, res) => {
   });
 });
 
-
-
-app.post("/test", (req, res) => {
-  res.json({
-    success: true,
-    message: "Test Route Working"
-  });
-});
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
