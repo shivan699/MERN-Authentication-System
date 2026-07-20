@@ -1,6 +1,3 @@
-// Standardizes every API response shape across the app:
-// { success, message, data? } for success, { success, message, errors? } for errors.
-
 const sendSuccess = (res, statusCode, message, data = null) => {
   const body = { success: true, message };
   if (data !== null) body.data = data;
