@@ -96,23 +96,19 @@ function SiteFooter() {
 // Segmented toggle: switches which card (Create Account / Log In) is
 // visible on the page. Only one panel renders at a time.
 // ------------------------------------------------------------------
-function ViewToggle({ active, onChange }) {
+function SegmentedToggle({ options, selected, onChange }) {
   return (
-    <div className="view-toggle">
-      <button
-        type="button"
-        className={`view-toggle-btn ${active === 'register' ? 'active' : ''}`}
-        onClick={() => onChange('register')}
-      >
-        Create Account
-      </button>
-      <button
-        type="button"
-        className={`view-toggle-btn ${active === 'login' ? 'active' : ''}`}
-        onClick={() => onChange('login')}
-      >
-        Log In
-      </button>
+    <div className="segmented-toggle">
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          className={`segmented-toggle-btn ${selected === option.value ? 'active' : ''}`}
+          onClick={() => onChange(option.value)}
+        >
+          {option.label}
+        </button>
+      ))}
     </div>
   );
 }
