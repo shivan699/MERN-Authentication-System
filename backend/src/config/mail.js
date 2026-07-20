@@ -1,21 +1,46 @@
 const nodemailer = require("nodemailer");
-const dns = require("dns");
+
+const EMAIL_USER = process.env.EMAIL_USER;
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT),
-  secure: Number(process.env.EMAIL_PORT) === 465,
-
+  service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
+    user: EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-
-  dnsLookup(hostname, options, callback) {
-    return dns.lookup(hostname, { family: 4 }, callback);
-  },
 });
+
+// Verify SMTP Connection
+transporter.verify((error) => {
+  if (error) {
+    console.error("❌ SMTP Connection Failed:", error.message);
+  } else {
+    console.log("✅ SMTP Server is ready to send emails");
+  }
+});
+
+// Common Send Email Function
+const sendEmail = async ({ to, subject, html }) => {
+  try {
+    const info = await transporter.sendMail({
+      from: `"MERN Authentication System" <${EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+    });
+
+    console.log(`✅ Email sent successfully to ${to}`);
+    console.log(`📨 Message ID: ${info.messageId}`);
+
+    return info;
+  } catch (error) {
+    console.error(`❌ Email send failed for ${to}:`, error.message);
+    throw new Error("Failed to send email. Please try again later.");
+  }
+};
+
+module.exports = {
+  transporter,
+  sendEmail,
+  EMAIL_USER,
+};
