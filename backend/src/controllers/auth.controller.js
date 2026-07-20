@@ -1,4 +1,4 @@
- const User = require('../models/User');
+const User = require('../models/User');
 const { hashPassword, comparePassword } = require('../utils/hashPassword');
 const { sendSuccess, sendError } = require('../utils/response');
 const otpService = require('../services/otp.service');
