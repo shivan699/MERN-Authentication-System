@@ -31,8 +31,8 @@ const formatMMSS = (totalSeconds) => {
 };
 
 // ------------------------------------------------------------------
-// Top navbar. The "Sign In" button is now functional — it switches
-// the page into the login view instead of being purely decorative.
+// Top navbar. The "Sign In" button is functional — switches the page
+// into the login view instead of being purely decorative.
 // ------------------------------------------------------------------
 function Navbar({ onSignInClick }) {
   return (
@@ -93,17 +93,23 @@ function SiteFooter() {
 }
 
 // ------------------------------------------------------------------
-// Segmented toggle: switches which card (Create Account / Log In) is
-// visible on the page. Only one panel renders at a time.
+// Pill-style segmented toggle: switches which card (Create Account /
+// Log In) is visible. Matches the visual language of the login-method
+// tabs (.tabs / .tab).
 // ------------------------------------------------------------------
-function SegmentedToggle({ options, selected, onChange }) {
+function ViewToggle({ active, onChange }) {
+  const options = [
+    { value: 'register', label: 'Create Account' },
+    { value: 'login', label: 'Log In' },
+  ];
+
   return (
     <div className="segmented-toggle">
       {options.map((option) => (
         <button
           key={option.value}
           type="button"
-          className={`segmented-toggle-btn ${selected === option.value ? 'active' : ''}`}
+          className={`segmented-toggle-btn ${active === option.value ? 'active' : ''}`}
           onClick={() => onChange(option.value)}
         >
           {option.label}
@@ -694,7 +700,7 @@ function ProfileView({ onLoggedOut }) {
 
 // ------------------------------------------------------------------
 // Root page. `activeView` ('register' | 'login') decides which single
-// card is shown; the two toggle buttons switch between them.
+// card is shown; the toggle buttons switch between them.
 // ------------------------------------------------------------------
 export default function AuthPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));

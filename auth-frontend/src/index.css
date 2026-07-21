@@ -455,3 +455,65 @@ body {
   .page-header, .pass, .stamp-card, .handoff-banner { animation: none; }
   .pass-panel.right.just-registered { animation: none; }
 }
+
+/* ================= VIEW TOGGLE (Create Account / Log In) ================= */
+.segmented-toggle {
+  display: flex;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+  margin-bottom: 20px;
+  width: fit-content;
+}
+
+.segmented-toggle-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 20px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.segmented-toggle-btn:hover:not(.active) {
+  color: var(--text);
+}
+
+.segmented-toggle-btn.active {
+  background: var(--accent);
+  color: #06231a;
+  box-shadow: 0 6px 16px -6px rgba(47, 217, 150, 0.5);
+}
+
+/* ================= SINGLE CARD (Create Account or Log In) ================= */
+.single-card {
+  width: 100%;
+  background: var(--panel);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px;
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.6);
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.single-card.just-registered {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both, handoff-glow 1.6s ease-out 0.4s 2;
+}
+
+.switch-note {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-dim);
+  margin-top: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .single-card, .single-card.just-registered { animation: none; }
+}
