@@ -93,33 +93,6 @@ function SiteFooter() {
 }
 
 // ------------------------------------------------------------------
-// Pill-style segmented toggle: switches which card (Create Account /
-// Log In) is visible. Matches the visual language of the login-method
-// tabs (.tabs / .tab).
-// ------------------------------------------------------------------
-function ViewToggle({ active, onChange }) {
-  const options = [
-    { value: 'register', label: 'Create Account' },
-    { value: 'login', label: 'Log In' },
-  ];
-
-  return (
-    <div className="segmented-toggle">
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          className={`segmented-toggle-btn ${active === option.value ? 'active' : ''}`}
-          onClick={() => onChange(option.value)}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ------------------------------------------------------------------
 // Reusable 6-character OTP input (format: e.g. "SHI124").
 // ------------------------------------------------------------------
 function OtpInput({ value, onChange }) {
@@ -195,7 +168,7 @@ function OtpExpiryTimer({ resetKey }) {
 // ------------------------------------------------------------------
 // Registration panel: register -> verify OTP -> done.
 // ------------------------------------------------------------------
-function RegisterPanel({ onRegistered }) {
+function RegisterPanel({ onRegistered, onSwitchToLogin }) {
   const [step, setStep] = useState('form');
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' });
   const [otp, setOtp] = useState('');
@@ -346,6 +319,9 @@ function RegisterPanel({ onRegistered }) {
         </button>
         <p className="terms-note">By signing up, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
       </form>
+      <p className="switch-note">
+        Already have an account? <button type="button" className="btn-link" onClick={onSwitchToLogin}>Sign in</button>
+      </p>
     </>
   );
 }
@@ -752,14 +728,12 @@ export default function AuthPage() {
               <p>Register a new account or sign in with a method of your choice.</p>
             </div>
 
-            <ViewToggle active={activeView} onChange={setActiveView} />
-
             <div
               key={activeView}
               className={`single-card ${activeView === 'login' && justRegistered ? 'just-registered' : ''}`}
             >
               {activeView === 'register' ? (
-                <RegisterPanel onRegistered={handleRegistered} />
+                <RegisterPanel onRegistered={handleRegistered} onSwitchToLogin={() => setActiveView('login')} />
               ) : (
                 <LoginPanel
                   onAuthSuccess={handleAuthSuccess}
