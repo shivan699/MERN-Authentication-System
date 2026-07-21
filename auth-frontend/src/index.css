@@ -482,3 +482,61 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .single-card, .single-card.just-registered { animation: none; }
 }
+
+
+/* ================================================================
+   MOBILE RESPONSIVE OVERRIDES
+   Nothing above this point is changed — these are additive rules
+   only, scoped to smaller viewports.
+   ================================================================ */
+
+/* ---------- Tablets / small laptops ---------- */
+@media (max-width: 900px) {
+  .hero-visual h1 { font-size: 34px; max-width: 100%; }
+  .hero-visual p.hero-sub { max-width: 100%; }
+  .hero-form-side { padding: 40px 24px; }
+}
+
+/* ---------- Phones (landscape / large) ---------- */
+@media (max-width: 640px) {
+  .navbar { padding: 14px 16px; }
+  .navbar .brand { font-size: 16px; }
+  .navbar .nav-link-text { display: none; }
+  .navbar .nav-cta { padding: 8px 14px; font-size: 12.5px; }
+
+  .hero-visual { padding: 40px 20px 28px; min-height: 260px; }
+  .hero-badge { font-size: 10px; padding: 5px 12px; margin-bottom: 18px; }
+  .hero-visual h1 { font-size: 28px; margin-bottom: 12px; }
+  .hero-visual p.hero-sub { font-size: 13.5px; margin-bottom: 20px; }
+  .trust-item { font-size: 12.5px; }
+
+  .hero-form-side { padding: 28px 16px; }
+  .page-header h1 { font-size: 21px; }
+  .page-header p { font-size: 12.5px; }
+
+  .single-card { padding: 24px 18px; border-radius: 14px; }
+  .panel-title { font-size: 17px; }
+
+  .tabs { flex-wrap: wrap; }
+  .tab { font-size: 11.5px; padding: 8px 6px; }
+
+  .field input { font-size: 16px; } /* 16px prevents iOS auto-zoom on focus */
+
+  .otp-row { gap: 6px; justify-content: space-between; }
+  .otp-box { width: 15.5vw; max-width: 42px; min-width: 32px; height: 42px; font-size: 17px; }
+
+  .social-row { flex-direction: column; }
+
+  .stamp-card { padding: 24px 18px; max-width: 100%; }
+  .profile-row { font-size: 13px; }
+
+  .site-footer { padding: 16px 20px; }
+  .site-footer .footer-links { flex-wrap: wrap; justify-content: center; gap: 12px 16px; }
+}
+
+/* ---------- Very small phones ---------- */
+@media (max-width: 360px) {
+  .otp-box { min-width: 28px; height: 38px; font-size: 15px; }
+  .single-card { padding: 20px 14px; }
+  .hero-visual h1 { font-size: 24px; }
+}
