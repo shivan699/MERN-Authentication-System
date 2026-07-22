@@ -1,5 +1,6 @@
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../config/jwt');
 const RefreshToken = require('../models/RefreshToken');
+const { emitToUser } = require('../socket');
 
 // Should stay in sync with JWT_REFRESH_EXPIRES_IN in .env (e.g. "7d").
 const REFRESH_TOKEN_TTL_DAYS = 7;
@@ -59,7 +60,12 @@ const rotateRefreshToken = async (oldToken) => {
  * @param {string} token
  */
 const revokeRefreshToken = async (token) => {
+  const record = await RefreshToken.findOne({ token });
   await RefreshToken.updateOne({ token }, { revoked: true });
+
+  if (record) {
+    emitToUser(record.user, 'session-revoked', { reason: 'logout' });
+  }
 };
 
 /**
@@ -69,6 +75,7 @@ const revokeRefreshToken = async (token) => {
  */
 const revokeAllUserTokens = async (userId) => {
   await RefreshToken.updateMany({ user: userId, revoked: false }, { revoked: true });
+  emitToUser(userId, 'session-revoked', { reason: 'password-reset' });
 };
 
 module.exports = {
@@ -76,4 +83,4 @@ module.exports = {
   rotateRefreshToken,
   revokeRefreshToken,
   revokeAllUserTokens,
-};
+}

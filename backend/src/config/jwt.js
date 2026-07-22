@@ -49,7 +49,7 @@ const generateRefreshToken = (payload) => {
 };
 
 /**
- * Verifies an access token and returns its decoded payload.
+ * Verifies an access token and returns its decoded payload. 
  * @param {string} token - The JWT access token to verify.
  * @returns {Object} Decoded token payload.
  * @throws {jwt.JsonWebTokenError|jwt.TokenExpiredError} If the token is

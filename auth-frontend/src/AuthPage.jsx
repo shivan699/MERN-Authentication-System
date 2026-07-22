@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   registerUser,
   verifyRegistrationOtp,
@@ -13,6 +14,8 @@ import {
   logoutUser,
   getProfile,
 } from './api/auth';
+import { setCredentials, logout as logoutAction } from './features/auth/authSlice';
+import { connectSocket, disconnectSocket } from './socket/socket';
 
 const OTP_TTL_SECONDS = 10 * 60; // must mirror backend otp.service.js OTP_TTL_MINUTES
 const RESEND_COOLDOWN_SECONDS = 30;
@@ -625,9 +628,13 @@ function LoginPanel({ onAuthSuccess, prefillEmail, justRegistered, onCreateAccou
 }
 
 // ------------------------------------------------------------------
-// Profile view: shown once authenticated.
+// Profile view: shown once authenticated. Reads refreshToken from
+// Redux (not localStorage directly) so it stays in sync with the
+// rest of the app's auth state.
 // ------------------------------------------------------------------
 function ProfileView({ onLoggedOut }) {
+  const dispatch = useDispatch();
+  const { refreshToken } = useSelector((state) => state.auth);
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState('');
 
@@ -643,14 +650,17 @@ function ProfileView({ onLoggedOut }) {
   useEffect(() => { loadProfile(); }, [loadProfile]);
 
   const handleLogout = async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
     try {
       if (refreshToken) await logoutUser({ refreshToken });
     } catch {
       // fall through — clear local state regardless
     } finally {
+      // Plain localStorage keys are what api/axios.jsx reads for the
+      // Authorization header — clear them alongside the Redux state.
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      dispatch(logoutAction());
+      disconnectSocket();
       onLoggedOut();
     }
   };
@@ -658,6 +668,9 @@ function ProfileView({ onLoggedOut }) {
   return (
     <div className="stamp-card">
       <div className="stamp">✓ VERIFIED</div>
+      <div className="mono" style={{ fontSize: 11, color: 'var(--text-dim)', marginBottom: 16 }}>
+        🟢 Live session active
+      </div>
       {error && <div className="msg msg-error">{error}</div>}
       {profile ? (
         <>
@@ -675,23 +688,54 @@ function ProfileView({ onLoggedOut }) {
 }
 
 // ------------------------------------------------------------------
-// Root page. `activeView` ('register' | 'login') decides which single
-// card is shown; the toggle buttons switch between them.
+// Root page. Auth status now lives in Redux (persisted via
+// redux-persist), and a live Socket.io connection listens for
+// server-pushed "session-revoked" events (logout / password reset
+// from anywhere) so every open tab reacts instantly.
 // ------------------------------------------------------------------
 export default function AuthPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));
+  const dispatch = useDispatch();
+  const { isAuthenticated, accessToken } = useSelector((state) => state.auth);
   const [activeView, setActiveView] = useState('register');
   const [prefillEmail, setPrefillEmail] = useState('');
   const [justRegistered, setJustRegistered] = useState(false);
 
+  // Opens (or re-opens, on refresh) the real-time connection whenever
+  // the user is authenticated, and force-logs-out this tab the moment
+  // the server reports the session was revoked elsewhere.
+  useEffect(() => {
+    if (!isAuthenticated || !accessToken) return;
+
+    const socket = connectSocket(accessToken);
+
+    socket.on('session-revoked', (payload) => {
+      alert(
+        payload?.reason === 'password-reset'
+          ? 'Your password was changed. Please log in again.'
+          : 'You were logged out from this session.'
+      );
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      dispatch(logoutAction());
+      disconnectSocket();
+    });
+
+    return () => socket.off('session-revoked');
+  }, [isAuthenticated, accessToken, dispatch]);
+
   const handleAuthSuccess = (data) => {
+    // Plain localStorage keys — api/axios.jsx's request interceptor
+    // reads the access token from here for every REST call.
     localStorage.setItem('accessToken', data.accessToken);
     localStorage.setItem('refreshToken', data.refreshToken);
-    setIsAuthenticated(true);
+
+    // Redux — drives isAuthenticated/UI state and stays in sync via
+    // redux-persist across reloads.
+    dispatch(setCredentials(data));
+    connectSocket(data.accessToken);
   };
 
   const handleLoggedOut = () => {
-    setIsAuthenticated(false);
     setJustRegistered(false);
     setActiveView('register');
   };
