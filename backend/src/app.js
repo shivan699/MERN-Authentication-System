@@ -2,17 +2,15 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
-const connectDB = require('./config/db');
 
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const otpRoutes = require('./routes/otp.routes');
-
+const chatRoutes = require('./routes/chat.routes');
 const { generalLimiter } = require('./middleware/rateLimiter');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
-connectDB();
 
 // Render (and most hosting platforms) sit behind a reverse proxy, so the
 // real client IP arrives via the X-Forwarded-For header. Without this,
@@ -54,6 +52,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/otp', otpRoutes);
+app.use('/api/chat', chatRoutes);
 
 // 404 — no path argument, so it's safe on both Express 4 and Express 5
 // (a bare '*' string throws on Express 5's path-to-regexp).
