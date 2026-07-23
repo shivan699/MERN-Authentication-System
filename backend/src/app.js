@@ -22,9 +22,38 @@ app.set('trust proxy', 1);
 app.use(helmet());
 
 // CORS
+// process.env.CLIENT_URL alone only ever allows ONE origin (the deployed
+// Vercel URL) — any request from localhost during development, or from
+// a Vercel preview deployment, gets blocked by the browser's CORS check.
+// This allows: the production URL from .env, localhost for local dev,
+// and any Vercel preview URL that belongs to this same project.
+const allowedOrigins = [
+  process.env.CLIENT_URL,      // e.g. https://mern-authentication-system-uzja.vercel.app
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+].filter(Boolean);
+
+const isVercelPreviewOfThisProject = (origin) => {
+  try {
+    const { hostname } = new URL(origin);
+    return /^mern-authentication-system-uzja(-[a-z0-9]+)?\.vercel\.app$/.test(hostname);
+  } catch {
+    return false;
+  }
+};
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || '*',
+    origin(origin, callback) {
+      // No Origin header = server-to-server calls, curl, Postman — allow.
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin) || isVercelPreviewOfThisProject(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
   })
 );
