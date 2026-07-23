@@ -222,14 +222,31 @@ export default function Dashboard({ onLoggedOut }) {
   const [profile, setProfile] = useState(null);
   const [pendingPrompt, setPendingPrompt] = useState(null);
 
+  // Clears every trace of the session (local storage, Redux, socket)
+  // and hands control back to AuthPage — used both for a normal
+  // logout click and for an expired/invalid token discovered while
+  // loading the profile.
+  const forceLogout = useCallback(() => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    dispatch(logoutAction());
+    disconnectSocket();
+    onLoggedOut();
+  }, [dispatch, onLoggedOut]);
+
   const loadProfile = useCallback(async () => {
     try {
       const res = await getProfile();
       setProfile(res.data);
-    } catch {
-      // Non-fatal for the dashboard shell; chat/home still render.
+    } catch (err) {
+      // An expired/invalid access token would otherwise leave the
+      // dashboard shell stuck with no profile data and no way out —
+      // bounce back to the auth page instead.
+      if (err?.response?.status === 401) {
+        forceLogout();
+      }
     }
-  }, []);
+  }, [forceLogout]);
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
 
@@ -237,13 +254,9 @@ export default function Dashboard({ onLoggedOut }) {
     try {
       if (refreshToken) await logoutUser({ refreshToken });
     } catch {
-      // fall through
+      // fall through — clear local state regardless of server result
     } finally {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      dispatch(logoutAction());
-      disconnectSocket();
-      onLoggedOut();
+      forceLogout();
     }
   };
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   registerUser,
@@ -11,8 +11,6 @@ import {
   verifyPhoneOtp,
   forgotPassword,
   resetPassword,
-  logoutUser,
-  getProfile,
 } from './api/auth';
 import { setCredentials, logout as logoutAction } from './features/auth/authSlice';
 import { connectSocket, disconnectSocket } from './socket/socket';
@@ -248,8 +246,11 @@ function RegisterPanel({ onRegistered, onSwitchToLogin }) {
           <StepDots current={2} />
         </div>
         <div className="msg msg-success">
-          Your account is active. Switch to the Log In tab above to continue.
+          Your account is active. Sign in below to continue.
         </div>
+        <button type="button" className="btn btn-primary" onClick={onSwitchToLogin} style={{ marginTop: 4 }}>
+          Go to Sign in
+        </button>
       </>
     );
   }
@@ -629,70 +630,16 @@ function LoginPanel({ onAuthSuccess, prefillEmail, justRegistered, onCreateAccou
 }
 
 // ------------------------------------------------------------------
-// Profile view: shown once authenticated. Reads refreshToken from
-// Redux (not localStorage directly) so it stays in sync with the
-// rest of the app's auth state.
-// ------------------------------------------------------------------
-function ProfileView({ onLoggedOut }) {
-  const dispatch = useDispatch();
-  const { refreshToken } = useSelector((state) => state.auth);
-  const [profile, setProfile] = useState(null);
-  const [error, setError] = useState('');
-
-  const loadProfile = useCallback(async () => {
-    try {
-      const res = await getProfile();
-      setProfile(res.data);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    }
-  }, []);
-
-  useEffect(() => { loadProfile(); }, [loadProfile]);
-
-  const handleLogout = async () => {
-    try {
-      if (refreshToken) await logoutUser({ refreshToken });
-    } catch {
-      // fall through — clear local state regardless
-    } finally {
-      // Plain localStorage keys are what api/axios.jsx reads for the
-      // Authorization header — clear them alongside the Redux state.
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      dispatch(logoutAction());
-      disconnectSocket();
-      onLoggedOut();
-    }
-  };
-
-  return (
-    <div className="stamp-card">
-      <div className="stamp">✓ VERIFIED</div>
-      <div className="mono" style={{ fontSize: 11, color: 'var(--text-dim)', marginBottom: 16 }}>
-        🟢 Live session active
-      </div>
-      {error && <div className="msg msg-error">{error}</div>}
-      {profile ? (
-        <>
-          <div className="profile-row"><span className="k">Name</span><span className="v">{profile.name}</span></div>
-          <div className="profile-row"><span className="k">Email</span><span className="v">{profile.email}</span></div>
-          <div className="profile-row"><span className="k">Phone</span><span className="v">{profile.phone}</span></div>
-          <div className="profile-row"><span className="k">Status</span><span className="v">{profile.isVerified ? 'Active' : 'Pending'}</span></div>
-        </>
-      ) : (
-        !error && <p style={{ color: 'var(--text-dim)' }}>Loading profile…</p>
-      )}
-      <button className="btn btn-ghost" onClick={handleLogout} style={{ marginTop: 20 }}>Log out</button>
-    </div>
-  );
-}
-
-// ------------------------------------------------------------------
-// Root page. Auth status now lives in Redux (persisted via
-// redux-persist), and a live Socket.io connection listens for
-// server-pushed "session-revoked" events (logout / password reset
-// from anywhere) so every open tab reacts instantly.
+// Root page. Auth status lives in Redux (persisted via redux-persist),
+// and a live Socket.io connection listens for server-pushed
+// "session-revoked" events (logout / password reset from anywhere) so
+// every open tab reacts instantly.
+//
+// NOTE: switching between the auth forms and <Dashboard /> is a plain
+// conditional render driven by `isAuthenticated` — there is no route
+// change and no full page load, so there is no possibility of the
+// browser jumping to a different domain/URL. React Router is not
+// needed here; do not add useNavigate() to this file.
 // ------------------------------------------------------------------
 export default function AuthPage() {
   const dispatch = useDispatch();
@@ -701,9 +648,13 @@ export default function AuthPage() {
   const [prefillEmail, setPrefillEmail] = useState('');
   const [justRegistered, setJustRegistered] = useState(false);
 
-  // Opens (or re-opens, on refresh) the real-time connection whenever
-  // the user is authenticated, and force-logs-out this tab the moment
-  // the server reports the session was revoked elsewhere.
+  // Opens the real-time connection whenever the user is authenticated
+  // (covers both a fresh login and a page refresh where redux-persist
+  // has already restored a token), and force-logs-out this tab the
+  // moment the server reports the session was revoked elsewhere.
+  // This is the ONLY place connectSocket() is called for an
+  // authenticated session — handleAuthSuccess below intentionally
+  // does not call it a second time, to avoid opening two sockets.
   useEffect(() => {
     if (!isAuthenticated || !accessToken) return;
 
@@ -731,9 +682,10 @@ export default function AuthPage() {
     localStorage.setItem('refreshToken', data.refreshToken);
 
     // Redux — drives isAuthenticated/UI state and stays in sync via
-    // redux-persist across reloads.
+    // redux-persist across reloads. This alone triggers the useEffect
+    // above (isAuthenticated flips to true), which opens the socket —
+    // so we deliberately do NOT call connectSocket() here too.
     dispatch(setCredentials(data));
-    connectSocket(data.accessToken);
   };
 
   const handleLoggedOut = () => {
