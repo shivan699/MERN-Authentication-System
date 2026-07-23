@@ -16,6 +16,7 @@ import {
 } from './api/auth';
 import { setCredentials, logout as logoutAction } from './features/auth/authSlice';
 import { connectSocket, disconnectSocket } from './socket/socket';
+import Dashboard from './Dashboard';
 
 const OTP_TTL_SECONDS = 10 * 60; // must mirror backend otp.service.js OTP_TTL_MINUTES
 const RESEND_COOLDOWN_SECONDS = 30;
@@ -748,15 +749,7 @@ export default function AuthPage() {
   };
 
   if (isAuthenticated) {
-    return (
-      <>
-        <Navbar onSignInClick={() => {}} />
-        <div className="hero-form-side" style={{ minHeight: 'calc(100vh - 130px)' }}>
-          <ProfileView onLoggedOut={handleLoggedOut} />
-        </div>
-        <SiteFooter />
-      </>
-    );
+    return <Dashboard onLoggedOut={handleLoggedOut} />;
   }
 
   return (
