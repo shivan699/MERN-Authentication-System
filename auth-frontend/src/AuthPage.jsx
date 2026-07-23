@@ -45,7 +45,7 @@ function Navbar({ onSignInClick }) {
         {BRAND_NAME}
       </div>
       <ul className="nav-links">
-        <li>Find Jobs</li>
+        <li>Find Me</li>
         <li>Companies</li>
         <li>Resources</li>
         <li>About</li>
